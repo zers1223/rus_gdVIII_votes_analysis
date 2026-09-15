@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест: Кто вы из депутатов Государственной Думы?</title>
+
+    <style>
+        :root {
+            --primary: #0056b3;
+            --primary-hover: #004085;
+            --success: #28a745;
+            --success-hover: #218838;
+            --danger: #dc3545;
+            --danger-hover: #c82333;
+            --neutral: #6c757d;
+            --neutral-hover: #5a6268;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 30px; display: flex; justify-content: center; min-height: 100vh; }
+        
+        .container { max-width: 1300px; width: 100%; display: flex; flex-direction: column; gap: 20px; }
+        
+        .header-panel { background: var(--card-bg); padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; border: 1px solid var(--border); }
+        .header-panel h1 { font-size: 28px; color: var(--primary); margin-bottom: 12px; }
+        .header-panel p { color: var(--text-muted); font-size: 16px; margin-bottom: 20px; }
+        
+
+        .workspace { display: none; grid-template-columns: 1fr 1fr; gap: 25px; align-items: start; }
+        .card { background: var(--card-bg); border-radius: 16px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); border: 1px solid var(--border); }
+        
+
+        .left-panel { display: flex; flex-direction: column; gap: 20px; min-height: 400px; }
+        .progress { font-size: 14px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .law-title { font-size: 18px; font-weight: 600; line-height: 1.6; color: var(--text); min-height: 120px; display: flex; align-items: center; }
+        .btn-group { display: flex; flex-direction: column; gap: 12px; }
+        
+
+        .right-panel { display: flex; flex-direction: column; gap: 20px; }
+        .video-box { width: 100%; border-radius: 12px; overflow: hidden; background: #000; box-shadow: 0 4px 12px rgba(0,0,0,0.1); aspect-ratio: 16/9; }
+        video { width: 100%; height: 100%; object-fit: contain; }
+        
+        .transcript-box { background: #f1f5f9; border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .transcript-title { font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; text-align: justify; text-justify: inter-word;}
+        .transcript-text { max-height: 500px; overflow-y: auto; font-size: 14px; line-height: 1.6; white-space: pre-line; word-break: break-word; color: #334155; padding-right: 5px; text-align: justify; text-justify: inter-word;}
+        .transcript-text::-webkit-scrollbar { width: 6px; }
+        .transcript-text::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        
+        button { padding: 14px 20px; font-size: 14px; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; transition: all 0.2s; }
+        .btn-start { background: var(--primary); color: white; padding: 14px 40px; font-size: 18px; }
+        .btn-start:hover { background: var(--primary-hover); }
+        .btn-for { background: var(--success); color: white; }
+        .btn-for:hover { background: var(--success-hover); }
+        .btn-against { background: var(--danger); color: white; }
+        .btn-against:hover { background: var(--danger-hover); }
+        .btn-abstain { background: var(--neutral); color: white; }
+        .btn-abstain:hover { background: var(--neutral-hover); }
+        
+        
+        
+        .download-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; color: var(--primary); text-decoration: none; font-size: 14px; font-weight: 600; padding: 10px; border-radius: 8px; background: #eff6ff; border: 1px solid #bfdbfe; transition: background 0.2s; }
+        .download-btn:hover { background: #dbeafe; }
+        .govoting-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; color: var(--primary); text-decoration: none; font-size: 14px; font-weight: 600; padding: 10px; border-radius: 8px; background: #eff6ff; border: 1px solid #bfdbfe; transition: background 0.2s; }
+        .govoting-btn:hover { background: #dbeafe; }
+        
+        .time-btn { background: var(--primary); color: white; }
+        .time-btn:hover { background: var(--primary-hover); }
+        button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .status-badge { padding: 12px; font-size: 15px; font-weight: 700; border-radius: 10px; text-align: center; }
+        .status-accepted { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+        .status-rejected { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+
+        .result-panel { display: none; background: var(--card-bg); border-radius: 16px; padding: 40px; box-shadow: 0 4px 25px rgba(0,0,0,0.06); border: 1px solid var(--border); text-align: center; }
+        .deputy-profile { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 30px; }
+        .deputy-photo { width: 160px; height: 225px; border-radius: 12px; object-fit: cover; box-shadow: 0 4px 15px rgba(0,0,0,0.12); border: 3px solid var(--primary); background: #e2e8f0; }
+        .match-name { font-size: 26px; font-weight: 800; color: var(--text); }
+        .match-party { font-size: 18px; color: var(--text-muted); font-weight: 500; }
+        .match-score { font-size: 22px; color: var(--success); font-weight: 800; margin-top: 5px; }
+        
+        .table-title { text-align: left; font-size: 20px; font-weight: 800; margin: 40px 0 15px 0; color: var(--text); border-bottom: 2px solid var(--primary); padding-bottom: 8px; }
+        .results-table-container { overflow-x: auto; width: 100%; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; background: #fff; }
+        th { background: #f8fafc; color: var(--text-muted); font-weight: 700; padding: 4px; border-bottom: 2px solid var(--border); text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+        td { padding: 6px; border-bottom: 1px solid var(--border); color: var(--text); line-height: 1.5; }
+        tr:hover { background: #f8fafc; }
+        
+        .t-badge { padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 12px; display: inline-block; white-space: nowrap; }
+        .t-for { background: #dcfce7; color: #15803d; }
+        .t-against { background: #fee2e2; color: #b91c1c; }
+        .t-abstain { background: #f1f5f9; color: #475569; }
+        .duma-link-icon { color: var(--primary); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+        .duma-link-icon:hover { text-decoration: underline; }
+   
+        .opc_hild {
+            border: 2px solid #F5F5F5;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .opc_hild .table {
+            margin-bottom: 0;
+        }
+
+        .opch_r {
+            font-weight: 500;
+        }
+
+        .format-pdf:after, .format-PDF:after {content:"pdf";}
+        .icon-file:before {color: #42679f;}
+        .format-pdf:before {color: #eb5a5a;}
+        
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background-color: #e2e8f0;
+            border-radius: 3px;
+            margin-top: 8px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background-color: var(--primary);
+            border-radius: 3px;
+            transition: width 0.3s ease-in-out;
+        }
+        
+        [data-tooltip] {
+            position: relative;
+            cursor: pointer;
+        }
+
+        [data-tooltip]::before {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            line-height: 1.5;
+            color: #ffffff;
+            background-color: #1e293b;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s ease-in-out;
+            z-index: 10000;
+
+            white-space: normal;
+            width: max-content;
+            max-width: 280px;
+            text-align: center;
+        }
+
+        [data-tooltip]::after {
+            content: "";
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            border-width: 6px 6px 0;
+            border-style: solid;
+            border-color: #1e293b transparent transparent;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s ease-in-out;
+            z-index: 10000;
+        }
+
+        [data-tooltip]:hover::before,
+        [data-tooltip]:hover::after {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+<body>
+
+    <div class="container">
+    
+    <div class="header-panel" id="header-panel">
+        <h1 style="text-align: center; font-size: 30px; margin-bottom: 25px;">Тест: Кто вы из депутатов Государственной Думы?</h1>
+        <p id="header-sub">VIII созыв (2021 - 2026 гг.)</p>
+        
+        <p style="font-size: 15px; line-height: 1.6; margin-bottom: 15px; color: var(--text); text-align: justify;">
+            У каждого депутата Госдумы есть как свой служебный автотранспорт, так и свой политический характер: смелость проголосовать так, как сказали; любовь к бюджетным деньгам; независимость от собственного мнения; трудолюбие в нажатии кнопок за своих коллег; чувство свободы в пределах регламента и административной ответственности; Именно поэтому в этих героях легко узнать что-то свое - особенно если вы тоже иногда говорите: <em>«Не читал, но поддерживаю»</em>.
+        </p>
+        
+        <p style="font-size: 15px; line-height: 1.6; margin-bottom: 15px; color: var(--text); text-align: justify;">
+            Этот тест поможет понять, какой российский депутат ближе вам по настроению, привычкам, мечтам и отношению к людям. Здесь нет правильных ответов - есть только правильное голосование. Выбирайте то, что действительно вам ближе.
+        </p>
+        
+        <p style="font-size: 15px; line-height: 1.6; margin-bottom: 20px; color: var(--text); text-align: justify; font-weight: 500;">
+            Ответьте на 15 вопросов о том, как бы вы проголосовали по реальным законопроектам, и узнайте, кто живёт внутри вас: единоросс-консерватор, системный оппозиционер, эсер-патриот, коммунист, новолюд-технократ или независимый депутат. Алгоритм посчитает косинусное сходство векторов ответов - и торжественно объявит, что вы, скорее всего, воздержались.
+        </p>
+        
+        <p style="font-size: 13px; line-height: 1.5; margin-bottom: 25px; color: var(--text-muted); font-style: italic; border-left: 3px solid var(--border); padding-left: 12px;">
+            <strong>Дисклеймер:</strong> тест не имеет юридической силы, как и некоторые законопроекты. Совпадения с реальными депутатами случайны, особенно если они голосовали одинаково.
+        </p>
+        
+        <div style="margin: 25px 0; display: flex; justify-content: center;">
+            <img src="https://s0.rbk.ru/v6_top_pics/resized/600xH/media/img/9/60/755838451424609.jpeg" 
+                 alt="Здание Государственной Думы" 
+                 style="width: 100%; max-width: 550px; height: auto; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid var(--border);"
+                 onerror="this.src='https://wikimedia.org'">
+        </div>
+        
+        <button class="btn-start" id="btn-start" onclick="startQuiz()">Начать тест</button>
+        <div id="loader" style="display: none; margin-top: 15px; color: var(--text-muted);">Загрузка политической базы данных...</div>
+    </div>
+
+    <div class="workspace" id="workspace">
+        <div class="card left-panel">
+            <div class="progress">Вопрос <span id="current-q">1</span> из  <span id="max-q">__</span></div>
+            <div class="progress-container">
+                <div id="progress-bar-fill" class="progress-bar-fill"></div>
+            </div>
+            
+            <div class="law-title" id="question-text">Текст законопроекта загружается...</div>
+            
+            <div class="btn-group" id="vote-buttons">
+                <button class="btn-for" onclick="submitAnswer(1)">ЗА</button>
+                <button class="btn-against" onclick="submitAnswer(-1)">ПРОТИВ</button>
+                <button class="btn-abstain" onclick="submitAnswer(0)">ВОЗДЕРЖУСЬ / ПРОПУСТИТЬ</button>
+            </div>
+            
+            <button class="download-btn" id="open-pdf-btn" onclick="downloadPdf()"></button>
+            
+            <div id="pdf-container" style="display: none; margin-top: 20px; text-align: left; width: 100%;">
+                <div style="width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.05); background: #fff;">
+                    <iframe id="pdf-frame" src="" style="width: 100%; height: 650px; border: none; display: block;"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <div class="card right-panel" id="right-panel">
+            <div class="transcript-title" id="voting-date">...</div>
+
+
+        <div id="opc_hild">
+            <table class="table table-hover table-striped borderless fs13px">
+            
+            <tr>
+                <td class="td_hild_l w25p"><div class="opch_l"><span class="opch_l_txt">Субъект права законодательной инициативы</span></div></td>
+                <td><div id="opc_initiative" class="opch_r"></div></td>
+            </tr>
+            <tr>
+                <td class="td_hild_l w25p"><div class="opch_l"><span class="opch_l_txt">Ответственный комитет</span></div></td>
+                <td><div id="opc_respc" class="opch_r"></div></td>
+            </tr>
+            <tr>
+                <td class="td_hild_l w25p"><div class="opch_l"><span class="opch_l_txt">Профильный комитет</span></div></td>
+                <td><div id="opc_leadc" class="opch_r"></div></td>
+            </tr>
+            <tr>
+                <td class="td_hild_l w25p"><div class="opch_l"><span class="opch_l_txt">Отрасль законодательства</span></div></td>
+                <td><div id="opc_branch" class="opch_r"></div></td>
+            </tr>
+
+            <tr>
+                <td class="td_hild_l w25p"><div class="opch_l"><span class="opch_l_txt">Тематический блок законопроектов</span></div></td>
+                <td><div id="opc_theme" class="opch_r"></div></td>
+            </tr>
+
+            <tr>
+                <td class="td_hild_l w25p"><div class="opch_l"><span class="opch_l_txt">Пакет документов при внесении</span></div></td>
+                <td>
+                    <div class="opch_r">
+                        <a id="opc_download" href="" target="_blank">
+                            <span class="format-pdf icon-file"></span>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            </table>
+        </div>
+
+            <div id="video-box" class="video-box" style="display: none;">
+                <video id="duma-video" controls preload="metadata"">
+                    <source id="video-source" src="" type="video/mp4">
+                    Ваш браузер не поддерживает встроенные видео.
+                </video>
+            </div>
+            
+            <a id="alt-url" class="govoting-btn" href="#" target="_blank" style="display: none;" data-tooltip="Перейти на сайт госдумы для видео">
+                На сайт Госдумы
+            </a>
+            
+            <div style="display: flex; justify-content: center; gap: 12px; width: 100%; margin-top: 20px;">
+                <button id = "mb-btn1" class="time-btn" onclick="moveTimeCode(-60)" data-tooltip="60 секунд">&lt; &lt;</button>
+                <button id = "mb-btn2" class="time-btn" onclick="moveTimeCode(-10)" data-tooltip="10 секунд">&lt;</button>
+                <button id="g-timecode" class="time-btn" href = "" onclick="guessTimeCode()" >Предположить таймкод</button>
+                <button id = "mb-btn3" class="time-btn" data-tooltip="Алгоритм может промахнуться. Если авто-таймкод сработал неровно, попробуйте отмотать время назад на продолжительность видео после последнего голосования (Обычно это пара минут конечной заставки или предложение депутата посмотреть фильм про Терешкову).">?</button>
+                <button id = "mb-btn4" class="time-btn" onclick="moveTimeCode(10)" data-tooltip="10 секунд">&gt;</button>
+                <button id = "mb-btn5" class="time-btn" onclick="moveTimeCode(60)" data-tooltip="60 секунд">&gt; &gt;</button>
+            </div>
+            <div class="transcript-box">
+                <div class="transcript-title">Стенограмма:</div>
+                <div id="transcript-text" class="transcript-text"></div>
+            </div>
+            
+            <a id="govoting-res" class="govoting-btn" href="#" target="_blank" style="display: none;">
+                Перейти на страницу результатов голосования.
+            </a>
+            <a id="govoting-sozd" class="govoting-btn" href="#" target="_blank" style="display: none;">
+                Перейти в базу данных СОЗД.
+            </a>
+        </div>
+    </div>
+
+    <div class="result-panel" id="result-panel">
+        <h2>Ваш результат:</h2>
+
+        <div class="deputy-profile">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 10px;">
+                <button id="carousel-prev" class="btn-abstain" style="padding: 10px 15px; font-size: 20px; display: none; border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;" onclick="switchDeputy(-1)">❬</button>
+                <img id="match-photo" class="deputy-photo" src="" alt="Фото депутата" style="margin: 0;">
+                <button id="carousel-next" class="btn-abstain" style="padding: 10px 15px; font-size: 20px; display: none; border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;" onclick="switchDeputy(1)">❭</button>
+            </div>
+
+            <div id="carousel-counter" style="display: none; font-size: 13px; font-weight: 700; color: #dc3545; background: #fef2f2; border: 1px solid #fee2e2; padding: 6px 16px; border-radius: 20px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">
+                Вы совпали сразу с несколькими депутатами (Показан <span id="carousel-cur-num">1</span> из <span id="carousel-total-num">1</span>)
+            </div>
+
+            <div class="match-name" id="match-name">Имя Депутата</div>
+            <div class="match-party" id="match-party">Партия</div>
+            <div class="match-score">Политическое сходство: <span id="match-pct">0</span>%</div>
+        </div>
+        
+        
+       <button class="btn-start" style="width: 100%; margin-bottom: 25px;" onclick="resetQuiz()">
+            Пройти тест еще раз (Законопроекты зарандомятся)
+        </button>
+        
+        <div class="table-title">Сравнительный протокол голосований</div>
+        <div class="results-table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 50%;">Законопроект</th>
+                        <th style="text-align: center;">Ваш выбор</th>
+                        <th style="text-align: center;">Выбор двойника</th>
+                        <th style="text-align: center;">Итог в Думе</th>
+                        <th style="text-align: center;">Ссылка</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+    </div>
+    </div>
+    
+    <script>
+        let qcount = 15;
+        let db = null;
+        let selectedLaws = [];
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        const MAX_QUESTIONS_LIMIT = 30; //Right now is not used
+
+        let currentLeadersList = [];
+        let currentLeaderIndex = 0; 
+        let isHttps = false;
+        
+        const buttons = document.querySelectorAll('.time-btn');
+        fetch('quizData.json')
+            .then(response => response.json())
+            .then(data => { db = data; checkSavedSession();})
+            .catch(err => { console.error("Error when loading quizData.json:", err); }); 
+            
+        if (window.location.protocol === 'https:'){isHttps = true;}
+        
+        function checkSavedSession() {
+            const savedIndex = localStorage.getItem('duma_current_index');
+            const savedLaws = localStorage.getItem('duma_selected_laws');
+            const savedAnswers = localStorage.getItem('duma_user_answers');
+
+            if (savedIndex !== null && savedLaws !== null && savedAnswers !== null) {
+                currentQuestionIndex = parseInt(savedIndex);
+                selectedLaws = JSON.parse(savedLaws);
+                userAnswers = JSON.parse(savedAnswers);
+
+                document.getElementById('header-panel').style.display = 'none';
+                document.getElementById('max-q').innerText = qcount;
+                
+                if (currentQuestionIndex >= qcount) {
+                    document.getElementById('workspace').style.display = 'none';
+                    calculateResult();
+                } else {
+                    document.getElementById('workspace').style.display = 'grid';
+                    showQuestion();
+                }
+            }
+        }
+        function moveTimeCode(sec){
+            let currentLaw = selectedLaws[currentQuestionIndex];
+            let video = document.getElementById('duma-video');
+            if (!isNaN(video.duration)) {
+                video.currentTime = video.currentTime + sec;
+            }
+        }
+        function guessTimeCode(){
+            let currentLaw = selectedLaws[currentQuestionIndex];
+            let video = document.getElementById('duma-video');
+            if (!isNaN(video.duration)) {
+                console.log(video.duration);
+                console.log(currentLaw.absT);
+                video.currentTime = video.duration - currentLaw.absT;
+            }
+        }
+        function startQuiz() {
+            if (!db) { 
+                document.getElementById('loader').style.display = 'block';
+                setTimeout(startQuiz, 300);
+                console.error("Error when reading quizData.json!");
+                return;
+            }
+            localStorage.clear();
+            
+            document.getElementById('max-q').innerText = qcount;
+            document.getElementById('header-panel').style.display = 'none';
+            document.getElementById('workspace').style.display = 'grid';
+            
+            let shuffled = [...db.laws].sort(() => 0.5 - Math.random());
+            selectedLaws = shuffled.slice(0, MAX_QUESTIONS_LIMIT);
+            
+            saveProgress();
+            showQuestion();
+        }
+        function showQuestion() { 
+            let currentLaw = selectedLaws[currentQuestionIndex];
+            
+            const button = document.getElementById('open-pdf-btn');
+            document.getElementById('pdf-container').style.display = 'none';
+            button.style.display = 'block';
+            button.disabled = false;
+            button.innerText = "Открыть документ на странице";
+            
+            let video = document.getElementById('duma-video');
+            let source = document.getElementById('video-source');
+            video_url = "http://duma.gov.ru/old/_pz/" + currentLaw.date + "_pz.mp4#t=0";
+            
+            let fallbackBlock = document.getElementById('alt-url');
+            if (isHttps){
+                video.style.display = 'none';
+                fallbackBlock.style.display = 'block';
+                fallbackBlock.innerText = "К сожалению сайт Госдумы не поддерживает https...";
+                fallbackBlock.href = "http://duma.gov.ru/old/_pz/" + currentLaw.date + "_pz.mp4#t=" + currentLaw.absT;
+                
+                document.getElementById('g-timecode').style.display = 'none';
+                document.getElementById('mb-btn1').style.display = 'none';
+                document.getElementById('mb-btn2').style.display = 'none';
+                document.getElementById('mb-btn3').style.display = 'none';
+                document.getElementById('mb-btn4').style.display = 'none';
+                document.getElementById('mb-btn5').style.display = 'none';
+            }else{
+                if (video_url.trim() !== "") {
+                    document.getElementById('video-box').style.display = 'block';
+                    document.getElementById('alt-url').style.display = 'none';
+
+                    source.removeEventListener('error', handleVideoError);
+                    source.addEventListener('error', handleVideoError);
+                    source.src = video_url;
+                    video.load();
+                }
+            }
+
+            let timeStr = currentLaw.time;
+            document.getElementById('opc_branch').innerText = currentLaw.branch;
+            document.getElementById('opc_initiative').innerText = currentLaw.initiative;
+            document.getElementById('opc_theme').innerText = currentLaw.thematicBlock;
+            document.getElementById('opc_respc').innerText = currentLaw.respComittee;
+            document.getElementById('opc_leadc').innerText = currentLaw.leadComittee;
+            document.getElementById('voting-date').innerText = timeStr;
+            document.getElementById('opc_download').href = "https://sozd.duma.gov.ru/" + currentLaw.download;
+            
+            let rawTranscript = (currentLaw.transcript && currentLaw.transcript.trim() !== "") 
+                ? currentLaw.transcript 
+                : "(Стенограмма обсуждения отсутствует)";
+            
+            let htmlTranscript = rawTranscript
+                .replace(/\\n/g, '<br>')
+                .replace(/\n/g, '<br>');
+            document.getElementById('transcript-text').innerHTML = htmlTranscript;
+            
+            document.getElementById('govoting-res').style.display = 'inline-flex';
+            document.getElementById('govoting-res').href = "http://vote.duma.gov.ru/vote/" + currentLaw.index;
+            
+            document.getElementById('govoting-sozd').style.display = 'inline-flex';
+            document.getElementById('govoting-sozd').href = "https://sozd.duma.gov.ru/bill/" + currentLaw.number;
+            
+            document.getElementById('current-q').innerText = currentQuestionIndex + 1;
+            document.getElementById('question-text').innerText = currentLaw.title;
+            
+            let progressPercent = ((currentQuestionIndex + 1) / qcount) * 100;
+            document.getElementById('progress-bar-fill').style.width = progressPercent + '%';
+        }
+ 
+        function submitAnswer(voteValue) {
+            let currentLaw = selectedLaws[currentQuestionIndex];
+            userAnswers.push({ lawIndexInDB: db.laws.indexOf(currentLaw), voteId: currentLaw.index,vote: voteValue });
+            let buttons = document.querySelectorAll('#vote-buttons button');
+            currentQuestionIndex++;
+            
+            saveProgress();
+            nextQuestion();
+        }
+        function nextQuestion() {
+            if (currentQuestionIndex < qcount) {
+                showQuestion();
+                return;
+            }
+            calculateResult();
+        } 
+        function getBadge(v) { 
+            if (v === 1) return 'ЗА';
+            if (v === -1) return 'ПРОТИВ';
+            return 'ВОЗДЕРЖАЛСЯ'; 
+        } 
+        
+        function calculateResult() {
+            document.getElementById('workspace').style.display = 'none';
+            document.getElementById('result-panel').style.display = 'block';
+            
+            let video = document.getElementById('duma-video');
+            if (video) {
+                video.pause();
+                video.src = "";
+                video.load();
+            }
+            
+            let userSumSq = 0;
+            userAnswers.forEach(ans => { if (ans.vote === 1 || ans.vote === -1) userSumSq++;});
+            let userLength = Math.sqrt(userSumSq);
+            
+            
+            if (userLength === 0) {
+                document.getElementById('match-name').innerText = "Вы либо прогульщик, либо депутат ЕР";
+                document.getElementById('match-party').innerText = "Ни одного активного голоса.";
+                return;
+            }
+            
+            let deputySimilarities = [];
+            let maxSimilarity = -1.0;
+            
+            db.deputies.forEach(deputy => {
+                let dotProduct = 0;
+                let deputySumSq = 0;
+                
+                userAnswers.forEach(ans => {
+                    let dVote = deputy.votes[ans.lawIndexInDB];
+                    let uVote = ans.vote;
+                    dotProduct += dVote * uVote;
+                    if (dVote === 1 || dVote === -1) deputySumSq++;
+                });
+                
+                let deputyLength = Math.sqrt(deputySumSq);
+                let similarity = (deputyLength > 0) ? (dotProduct / (userLength * deputyLength)) : 0;
+                
+                deputySimilarities.push({ deputy: deputy, sim: similarity });
+                if (similarity > maxSimilarity) { maxSimilarity = similarity; }
+            });
+    
+            currentLeadersList = [];
+            deputySimilarities.forEach(item => {
+                if (Math.abs(item.sim - maxSimilarity) < 0.00001) {
+                    currentLeadersList.push(item.deputy);
+                }
+            });
+    
+            currentLeaderIndex = 0;
+            let matchPercentage = Math.round(((maxSimilarity + 1) / 2) * 100);
+            document.getElementById('match-pct').innerText = matchPercentage;
+
+            if (currentLeadersList.length > 1) {
+                document.getElementById('carousel-prev').style.display = 'flex';
+                document.getElementById('carousel-next').style.display = 'flex';
+                document.getElementById('carousel-counter').style.display = 'inline-block';
+                document.getElementById('carousel-total-num').innerText = currentLeadersList.length;
+            } else {
+                document.getElementById('carousel-prev').style.display = 'none';
+                document.getElementById('carousel-next').style.display = 'none';
+                document.getElementById('carousel-counter').style.display = 'none';
+            }
+            renderCurrentDeputy();
+        }
+        
+        function renderCurrentDeputy() {
+            let deputy = currentLeadersList[currentLeaderIndex];
+            
+            document.getElementById('match-name').innerText = deputy.name;
+            document.getElementById('match-party').innerText = deputy.party;
+            document.getElementById('carousel-cur-num').innerText = currentLeaderIndex + 1;
+            document.getElementById('match-photo').src = deputy.picURL;
+            
+            let tbody = document.getElementById('table-body');
+            tbody.innerHTML = "";
+            selectedLaws.forEach((law, idx) => {
+                if (!userAnswers[idx]) return;
+                
+                let voteId = userAnswers[idx].voteId;
+                let uVote = userAnswers[idx].vote;
+                let dVote = deputy.votes[userAnswers[idx].lawIndexInDB];
+                let dumaResult = law.accepted ? '<span style="color:#15803d; font-weight:700;">Принят</span>' : '<span style="color:#b91c1c; font-weight:700;">Отклонен</span>';
+                
+                let row = `<tr>
+                    <td style="font-weight: 600; text-align: left;">${law.title}</td>
+                    <td style="text-align: center;">${getBadge(uVote)}</td>
+                    <td style="text-align: center;">${getBadge(dVote)}</td>
+                    <td style="text-align: center;">${dumaResult}</td>
+                    <td style="text-align: center;"><a class="duma-link-icon" href="http://vote.duma.gov.ru/vote/` + voteId + `" target="_blank">Итог</a></td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function switchDeputy(direction) {
+            currentLeaderIndex += direction;
+            
+            if (currentLeaderIndex < 0) {
+                currentLeaderIndex = currentLeadersList.length - 1;
+            } else if (currentLeaderIndex >= currentLeadersList.length) {
+                currentLeaderIndex = 0;
+            }
+            
+            renderCurrentDeputy();
+        }
+        
+        async function downloadPdf(){
+            let currentLaw = selectedLaws[currentQuestionIndex];
+            const url = "https://sozd.duma.gov.ru/" + currentLaw.download;
+            const button = document.getElementById('open-pdf-btn');
+            const iframe = document.getElementById('pdf-frame');
+            document.getElementById('pdf-container').style.display = 'flex';
+            document.getElementById('open-pdf-btn').style.display = 'none';
+            
+            button.innerText = "Загрузка...";
+            button.disabled = true;
+            
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Ошибка сети');
+                
+                const arrayBuffer = await response.arrayBuffer();
+                const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
+                const blobUrl = URL.createObjectURL(blob);
+                
+                iframe.src = blobUrl;
+                iframe.style.display = "block";
+                
+                button.innerText = "Документ открыт";
+            } catch (error) {
+                alert('Не удалось открыть файл: ' + error.message);
+                button.innerText = "Ошибка";
+                button.disabled = false;
+            }
+        }
+        function saveProgress() {
+            localStorage.setItem('duma_current_index', currentQuestionIndex);
+            localStorage.setItem('duma_selected_laws', JSON.stringify(selectedLaws));
+            localStorage.setItem('duma_user_answers', JSON.stringify(userAnswers));
+        }
+        function resetQuiz() {
+            localStorage.clear();
+            location.reload();
+        }
+        function handleVideoError() {
+            let currentLaw = selectedLaws[currentQuestionIndex];
+            let video = document.getElementById('duma-video');
+            let source = document.getElementById('video-source');
+            let currentSrc = source.src;
+            
+            console.log("Error: ");
+            console.log(currentSrc);
+            
+            if (currentSrc.includes("/_drugoe/") === false) {
+                let fallbackSrc = "http://duma.gov.ru/old/_drugoe/" + currentLaw.date + "_pz.MP4#t=0";
+                source.src = fallbackSrc;
+                console.log("Error: trying another url...");
+                console.log(fallbackSrc);
+                video.load(); 
+            } else {
+                console.log("Also error...");
+                document.getElementById('alt-url').style.display = 'flex';
+                document.getElementById('alt-url').href = "http://duma.gov.ru/multimedia/video/meetings/" + currentLaw.code + "/misc/";
+                // document.getElementById('video-box').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
