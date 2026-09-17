@@ -602,7 +602,7 @@
             document.getElementById('match-name').innerText = deputy.name;
             document.getElementById('match-party').innerText = deputy.party;
             document.getElementById('carousel-cur-num').innerText = currentLeaderIndex + 1;
-            document.getElementById('match-photo').src = deputy.picURL;
+            document.getElementById('match-photo').src = "https://images.weserv.nl/?url=" + deputy.picURL;
             
             let tbody = document.getElementById('table-body');
             tbody.innerHTML = "";
